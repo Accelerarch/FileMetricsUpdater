@@ -16,13 +16,7 @@ def lambda_handler(event, context):
             response = s3.get_object(Bucket=bucket, Key=storage_usage_key)
             storage_data = json.loads(response['Body'].read().decode('utf-8'))
         except ClientError as e:
-            # Handle the key not existing and initializing default values
-            if e.response['Error']['Code'] == 'NoSuchKey':
-                print(f"{storage_usage_key} does not exist. Creating a new one.")
-                storage_data = {"fileCount": 0, "totalBytes": 0}
-            # Other errors
-            else:
-                raise e
+            raise e
 
         # Get the previous storage usage metrics
         file_count = storage_data.get('fileCount', 0)
@@ -30,8 +24,8 @@ def lambda_handler(event, context):
  
         # Get the size of the added file
         new_file_size = event['Records'][0]['s3']['object']['size']
-        file_count += 1
-        total_bytes += new_file_size
+        file_count = max(0,file_count-1)
+        total_bytes = max(0,new_file_size)
 
         # Update the storage data JSON
         storage_data['fileCount'] = file_count

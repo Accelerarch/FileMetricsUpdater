@@ -5,6 +5,9 @@ FROM --platform=linux/amd64 public.ecr.aws/lambda/python:3.13
 COPY requirements.txt .
 COPY app.py /var/task/
 
+ARG CONN_STRING
+ENV CONN_STRING=${CONN_STRING}
+
 # Install dependencies if needed
 RUN pip install -r requirements.txt
 

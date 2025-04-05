@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 import json
+import os
+from dotenv import load_dotenv
 import urllib.parse
 import boto3
 from botocore.exceptions import ClientError
 
+load_dotenv()
 s3 = boto3.client('s3')
+
+USAGE_BUCKET = os.getenv("USAGE_BUCKET")
 
 def lambda_handler(event, context):
     bucket = event['Records'][0]['s3']['bucket']['name']
@@ -13,7 +18,7 @@ def lambda_handler(event, context):
         storage_usage_key = key.split("/")[0]+"/usage.json"
         # Get storage usage file
         try:
-            response = s3.get_object(Bucket=bucket, Key=storage_usage_key)
+            response = s3.get_object(Bucket=USAGE_BUCKET, Key=storage_usage_key)
             storage_data = json.loads(response['Body'].read().decode('utf-8'))
         except ClientError as e:
             # Handle the key not existing and initializing default values
@@ -37,7 +42,7 @@ def lambda_handler(event, context):
         storage_data['fileCount'] = file_count
         storage_data['totalBytes'] = total_bytes
         s3.put_object(
-            Bucket=bucket,
+            Bucket=USAGE_BUCKET,
             Key=storage_usage_key,  
             Body=json.dumps(storage_data),
             ContentType='application/json'

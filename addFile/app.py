@@ -28,10 +28,10 @@ def lambda_handler(event, context):
         file_count = storage_data.get('fileCount', 0)
         total_bytes = storage_data.get('totalBytes', 0)
  
-        # Get the size of the removed file
-        remove_file_size = event['Records'][0]['s3']['object']['size']
-        file_count = max(0,file_count-1)
-        total_bytes = max(0,total_bytes-remove_file_size)
+        # Get the size of the added file
+        new_file_size = event['Records'][0]['s3']['object']['size']
+        file_count += 1
+        total_bytes += new_file_size
 
         # Update the storage data JSON
         storage_data['fileCount'] = file_count
